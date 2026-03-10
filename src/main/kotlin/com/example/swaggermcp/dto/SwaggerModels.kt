@@ -4,7 +4,8 @@ data class ServiceSummary(
     val name: String,
     val description: String,
     val url: String,
-    val apiCount: Int
+    val apiCount: Int,
+    val cachedAt: String? = null
 )
 
 data class ApiSummary(
@@ -15,6 +16,14 @@ data class ApiSummary(
     val deprecated: Boolean = false
 )
 
+data class PagedResult<T>(
+    val items: List<T>,
+    val total: Int,
+    val page: Int,
+    val size: Int,
+    val hasNext: Boolean
+)
+
 data class ApiDetail(
     val method: String,
     val path: String,
@@ -23,7 +32,8 @@ data class ApiDetail(
     val tag: String?,
     val parameters: List<ParameterInfo>,
     val requestBody: Map<String, Any>?,
-    val responses: Map<String, Any>?
+    val responses: Map<String, Any>?,
+    val resolvedSchemas: Map<String, Any>? = null
 )
 
 data class ParameterInfo(

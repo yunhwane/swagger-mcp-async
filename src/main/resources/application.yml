@@ -39,4 +39,6 @@ swagger-center:
   webhook:
     secret: ""
     enabled: true
+  cache:
+    ttl-minutes: 60
   services: []
