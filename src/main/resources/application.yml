@@ -21,14 +21,22 @@ logging:
 # Register your Swagger/OpenAPI services here.
 # Example:
 #   swagger-center:
+#     webhook:
+#       secret: your-github-webhook-secret   # GitHub Webhook secret (HMAC-SHA256)
+#       enabled: true
 #     services:
 #       - name: petstore
 #         url: https://petstore3.swagger.io
 #         swagger-path: /api/v3/openapi.json
 #         description: Swagger Petstore sample API
+#         repository: my-org/petstore         # GitHub repo full name (owner/repo)
 #       - name: my-backend
 #         url: http://localhost:8080
 #         swagger-path: /v3/api-docs
 #         description: My backend service API
+#         repository: my-org/my-backend
 swagger-center:
+  webhook:
+    secret: ""
+    enabled: true
   services: []
