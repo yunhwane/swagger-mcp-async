@@ -6,16 +6,36 @@ Register your microservices once, and let AI assistants explore APIs, inspect sc
 
 ## Features
 
+### Tools
+
 | Tool | Description |
 |------|-------------|
-| `listServices` | List all registered services with API counts |
+| `listServices` | List all registered services with API counts and cache timestamps |
 | `listTags` | List tags (API groups) for a service |
 | `listApis` | List APIs with tag filtering and pagination |
-| `getApiDetail` | Get full API details (params, request body, responses) |
+| `searchApis` | Search APIs by keyword across path, summary, description, and operationId |
+| `getApiDetail` | Get full API details with automatic `$ref` schema resolution |
 | `getComponentSchema` | Inspect a component schema definition |
 | `listSchemas` | List all schema names in a service |
 | `generateDartCode` | Generate Dart classes from schemas (json_serializable / freezed / plain) |
 | `refreshSwaggerCache` | Refresh cached Swagger specs |
+
+### MCP Prompts
+
+| Prompt | Description |
+|--------|-------------|
+| `search-apis` | Search relevant APIs from a registered service |
+| `explore-service` | Explore the full structure of a service (tags, API list) |
+| `get-api-spec` | Get the detailed specification of a specific API |
+| `generate-dart-models` | Generate Dart model code from Swagger schemas |
+
+### Other Features
+
+- **Auto `$ref` resolution** — `getApiDetail` automatically resolves referenced schemas and includes them in `resolvedSchemas`
+- **Cache TTL** — Configurable cache expiration (`swagger-center.cache.ttl-minutes`, default: 60)
+- **Fuzzy service name matching** — Exact → case-insensitive → contains match
+- **Structured error handling** — Invalid service names and missing schemas return MCP `isError=true` responses with helpful messages
+- **Paginated responses** — `listApis` and `searchApis` return `{ items, total, page, size, hasNext }`
 
 ## Quick Start
 
@@ -53,6 +73,11 @@ Add your Swagger/OpenAPI services to `swagger-center.services`:
 
 ```yaml
 swagger-center:
+  cache:
+    ttl-minutes: 60          # Cache expiration (default: 60, 0 = no expiration)
+  webhook:
+    secret: ""               # GitHub webhook secret (optional)
+    enabled: true
   services:
     - name: petstore
       url: https://petstore3.swagger.io
@@ -64,7 +89,7 @@ swagger-center:
       description: My backend service API
 ```
 
-Each entry requires:
+Each service entry requires:
 - **name** — Unique identifier for the service
 - **url** — Base URL of the service
 - **swagger-path** — Path to the OpenAPI/Swagger JSON endpoint
@@ -133,7 +158,8 @@ Connect to the SSE endpoint:
     "name": "petstore",
     "description": "Swagger Petstore sample API",
     "url": "https://petstore3.swagger.io",
-    "apiCount": 19
+    "apiCount": 19,
+    "cachedAt": "2025-01-15T10:30:00Z"
   }
 ]
 ```
@@ -166,22 +192,57 @@ Connect to the SSE endpoint:
 
 **Response:**
 ```json
-[
-  {
-    "method": "GET",
-    "path": "/pet/{petId}",
-    "summary": "Find pet by ID",
-    "tag": "pet",
-    "deprecated": false
-  },
-  {
-    "method": "POST",
-    "path": "/pet",
-    "summary": "Add a new pet to the store",
-    "tag": "pet",
-    "deprecated": false
-  }
-]
+{
+  "items": [
+    {
+      "method": "GET",
+      "path": "/pet/{petId}",
+      "summary": "Find pet by ID",
+      "tag": "pet",
+      "deprecated": false
+    },
+    {
+      "method": "POST",
+      "path": "/pet",
+      "summary": "Add a new pet to the store",
+      "tag": "pet",
+      "deprecated": false
+    }
+  ],
+  "total": 12,
+  "page": 0,
+  "size": 20,
+  "hasNext": false
+}
+```
+
+### `searchApis` — Search APIs by keyword
+
+**Parameters:**
+| Name | Required | Description |
+|------|----------|-------------|
+| `serviceName` | Yes | Service name |
+| `query` | Yes | Search keyword (case-insensitive, matches path/summary/description/operationId) |
+| `page` | No | Page number (0-based, default: 0) |
+| `size` | No | Page size (default: 20) |
+
+**Response:**
+```json
+{
+  "items": [
+    {
+      "method": "GET",
+      "path": "/pet/findByStatus",
+      "summary": "Finds Pets by status",
+      "tag": "pet",
+      "deprecated": false
+    }
+  ],
+  "total": 1,
+  "page": 0,
+  "size": 20,
+  "hasNext": false
+}
 ```
 
 ### Step 3: `getApiDetail` — Full API specification
@@ -192,6 +253,7 @@ Connect to the SSE endpoint:
 | `serviceName` | Yes | Service name |
 | `path` | Yes | API path (e.g. `/pet/{petId}`) |
 | `method` | Yes | HTTP method (GET, POST, PUT, DELETE, PATCH) |
+| `resolveRefs` | No | Auto-resolve `$ref` schemas (default: true) |
 
 **Response:**
 ```json
@@ -218,6 +280,24 @@ Connect to the SSE endpoint:
         "application/json": {
           "schema": { "$ref": "#/components/schemas/Pet" }
         }
+      }
+    }
+  },
+  "resolvedSchemas": {
+    "Pet": {
+      "type": "object",
+      "required": ["name", "photoUrls"],
+      "properties": {
+        "id": { "type": "integer", "format": "int64" },
+        "name": { "type": "string", "example": "doggie" },
+        "category": { "$ref": "#/components/schemas/Category" }
+      }
+    },
+    "Category": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "integer", "format": "int64" },
+        "name": { "type": "string" }
       }
     }
   }
