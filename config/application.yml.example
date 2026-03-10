@@ -1,0 +1,42 @@
+# Example configuration for swagger-mcp-server-async
+#
+# Copy this file to application.yml and customize it:
+#   cp application.yml.example application.yml
+#
+# Each service entry requires:
+#   - name:         Unique identifier for the service
+#   - url:          Base URL of the service
+#   - swagger-path: Path to the OpenAPI/Swagger JSON endpoint
+#   - description:  Human-readable description of the service
+
+swagger-center:
+  services:
+    # Public Petstore demo API
+    - name: petstore
+      url: https://petstore3.swagger.io
+      swagger-path: /api/v3/openapi.json
+      description: Swagger Petstore sample API
+
+    # Spring Boot default (springdoc-openapi)
+    # - name: my-spring-app
+    #   url: http://localhost:8080
+    #   swagger-path: /v3/api-docs
+    #   description: My Spring Boot application API
+
+    # Spring Boot with custom context path
+    # - name: admin-service
+    #   url: http://localhost:9090
+    #   swagger-path: /api/v3/api-docs
+    #   description: Admin service API
+
+    # .NET / Swashbuckle
+    # - name: dotnet-api
+    #   url: https://api.example.com
+    #   swagger-path: /swagger/v1/swagger.json
+    #   description: .NET Web API service
+
+    # FastAPI (Python)
+    # - name: fastapi-app
+    #   url: http://localhost:8000
+    #   swagger-path: /openapi.json
+    #   description: FastAPI application

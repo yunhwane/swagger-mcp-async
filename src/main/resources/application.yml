@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: swagger-mcp-server-async
+  main:
+    banner-mode: off
+  ai:
+    mcp:
+      server:
+        name: swagger-mcp-server
+        version: 0.0.1
+        type: ASYNC
+        sse-message-endpoint: /mcp/messages
+
+server:
+  port: 8090
+
+logging:
+  level:
+    org.springframework.web.reactive: INFO
+
+# Register your Swagger/OpenAPI services here.
+# Example:
+#   swagger-center:
+#     services:
+#       - name: petstore
+#         url: https://petstore3.swagger.io
+#         swagger-path: /api/v3/openapi.json
+#         description: Swagger Petstore sample API
+#       - name: my-backend
+#         url: http://localhost:8080
+#         swagger-path: /v3/api-docs
+#         description: My backend service API
+swagger-center:
+  services: []

@@ -1,0 +1,19 @@
+# External configuration file for Docker deployment.
+# Mount this file to /app/config/application.yml via docker-compose.
+#
+# Add your Swagger/OpenAPI services below.
+swagger-center:
+  services:
+    - name: petstore
+      url: https://petstore3.swagger.io
+      swagger-path: /api/v3/openapi.json
+      description: Swagger Petstore sample API
+    # Add more services as needed:
+    # - name: my-backend
+    #   url: http://localhost:8080
+    #   swagger-path: /v3/api-docs
+    #   description: My backend service API
+    # - name: another-service
+    #   url: https://api.example.com
+    #   swagger-path: /swagger/v1/swagger.json
+    #   description: Another microservice API

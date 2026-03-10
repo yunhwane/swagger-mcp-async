@@ -1,0 +1,11 @@
+services:
+  swagger-mcp:
+    build: .
+    image: swagger-mcp-server:latest
+    ports:
+      - "${SERVER_PORT:-8090}:8090"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-default}
+    volumes:
+      - ./config/application.yml:/app/config/application.yml:ro
+    restart: unless-stopped
